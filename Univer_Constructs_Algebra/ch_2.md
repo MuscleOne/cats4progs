@@ -302,7 +302,7 @@ We define functions out of a sum type by pattern matching. Here are two possible
 h :: Either a b -> c
 h eab = case eab of
         Left a -> foo a
-        Right b -> bar a
+        Right b -> bar b
 ```
 or 
 ```haskell
@@ -311,6 +311,75 @@ h (Left a) = foo a
 h (Right b) = bar b
 ```
 So, what are the types of the functions `foo` and `bar` above? 
+It should be `foo :: a -> c`, **Right?**
+
+**So what? I have not mede sense yet!**
+
+*Exercise.* **Maybe**
+Note that a constructor in a sum type need not have any type variable, for example, the `Maybe` type constructor defined in the `Prelude` has the following definition:
+```haskell
+data Maybe a = Nothing | Just a
+```
+here `Nothing` is a constructor for a singleton type, with the unique term `Nothing`. Thinking of this as a terminal object 1, the type `Maybe` a models the coproduct $1+a$. 
+
+This data constructors have the type signatures
+```haskell
+-- run `:t` and get the type signaturesa
+Nothing :: Maybe a
+Just :: a -> Maybe a
+```
+Thinking of `Nothing` as a map from a singleton type for example `()` to `Maybe a`, these data construtor correspond to the two inclusions into the coproduct $1+a$. 
+
+In effect, `Maybe a` adds a single, new term, `Nothing` to the type `a`.  
+This is useful for type safe definitions of operations that are not totally defined. For example, the integer division function `div` does not always return an integer: it returns an exception if we try to divide by zero. However, we can make this function total by sending division by zero to `Nothing`:
+```haskell
+safeDev :: Int -> Int -> Maybe Int
+safeDev m n = 
+    if n == 0
+    then Nothing
+    else Just (div m n)
+```
+Note that the return type is now `Maybe Int` instead of `Int`. 
+
+*Example*. As promised previously, we can now implement the type `Suit` fro our running cards example. This is simply a sum type with four data constructors:
+```haskell
+data Suit = Club | Diamond | Heart | Spade
+```
+
+**Using the universal property of the coproduct** 
+In analogy with the funciton `tuple` for products, there is an convenient function in haskell that encapsulates the universal property of the coproduct. 
+```haskell
+either :: (a -> c) -> (b -> c) -> (Either a b -> c)
+either f g = 
+    \e -> case e of 
+          Left a -> f a
+          Right b -> g b
+```
+The `either` function has an inverse
+```haskell
+unEither :: (Either a b -> c) -> (a -> c, b -> c)
+unEither h = (h . Left, h . Right)
+```
+The above style is called *point free* becouse it doesn't use variable; it is equivalent to the following 
+```haskell
+unEither h = (\a -> h (Left a), \b -> h (Rigth b))
+```
+## Exponentials and function types
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
